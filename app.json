@@ -40,7 +40,13 @@
           }
         }
       ],
-      "@react-native-community/datetimepicker"
-    ]
+      "@react-native-community/datetimepicker",
+      "@livekit/react-native-expo-plugin"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "11bece2f-3ec9-4955-9caa-14d22eb1a35d"
+      }
+    }
   }
 }
