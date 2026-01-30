@@ -23,7 +23,7 @@ import PsychologistProfileScreen from './src/screens/PsychologistProfileScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import SessionDetailScreen from './src/screens/SessionDetailScreen';
 import SessionRequestsScreen from './src/screens/SessionRequestsScreen';
-import SessionRequestsScreen from './src/screens/SessionRequestsScreen';
+
 import SessionScreen from './src/screens/SessionScreen';
 import AddFundsScreen from './src/screens/AddFundsScreen';
 
