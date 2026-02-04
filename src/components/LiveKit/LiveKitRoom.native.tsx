@@ -29,9 +29,11 @@ interface LiveKitRoomProps {
     url: string;
     onDisconnect: () => void;
     sessionId: string;
+    demoMinutes?: number;
+    sessionStartTime?: string | null;
 }
 
-export default function LiveKitRoom({ token, url, onDisconnect, sessionId }: LiveKitRoomProps) {
+export default function LiveKitRoom({ token, url, onDisconnect, sessionId, demoMinutes, sessionStartTime }: LiveKitRoomProps) {
     const [room] = useState(() => new Room({
         adaptiveStream: false,
         dynacast: false,
@@ -211,6 +213,25 @@ export default function LiveKitRoom({ token, url, onDisconnect, sessionId }: Liv
         );
     };
 
+    // Demo Status
+    const [demoActive, setDemoActive] = useState(false);
+
+    useEffect(() => {
+        if (!demoMinutes || !sessionStartTime) return;
+
+        const checkDemoStatus = () => {
+            const now = new Date();
+            const start = new Date(sessionStartTime);
+            const elapsedMinutes = (now.getTime() - start.getTime()) / 60000;
+            const isActive = elapsedMinutes < demoMinutes;
+            setDemoActive(isActive);
+        };
+
+        checkDemoStatus();
+        const interval = setInterval(checkDemoStatus, 10000); // Check every 10s
+        return () => clearInterval(interval);
+    }, [demoMinutes, sessionStartTime]);
+
     if (!isConnected) {
         return (
             <View style={styles.loadingContainer}>
@@ -222,6 +243,13 @@ export default function LiveKitRoom({ token, url, onDisconnect, sessionId }: Liv
 
     return (
         <View style={styles.container}>
+            {/* Demo Badge */}
+            {demoActive && (
+                <View style={styles.demoBadge}>
+                    <Text style={styles.demoText}>🎉 Free Demo Active</Text>
+                </View>
+            )}
+
             <View style={styles.grid}>
                 {participants.map(renderParticipant)}
             </View>
@@ -473,5 +501,25 @@ const styles = StyleSheet.create({
     sendButtonText: {
         color: 'white',
         fontWeight: 'bold',
+    },
+    demoBadge: {
+        position: 'absolute',
+        top: 40,
+        alignSelf: 'center',
+        backgroundColor: '#16a34a',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        zIndex: 100,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    demoText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 14,
     },
 });

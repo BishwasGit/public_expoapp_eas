@@ -16,6 +16,7 @@ export default function SessionDetailScreen({ route, navigation }: any) {
     const { sessionId } = route.params;
     const { user } = useContext(AuthContext);
     const [session, setSession] = useState<any>(null);
+    const [transaction, setTransaction] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -26,6 +27,13 @@ export default function SessionDetailScreen({ route, navigation }: any) {
         try {
             const res = await apiClient.get(`/sessions/${sessionId}`);
             setSession(res.data.data || res.data);
+
+            // Fetch transaction
+            const txRes = await apiClient.get(`/wallet/transactions?referenceId=${sessionId}`);
+            const transactions = txRes.data.data || txRes.data;
+            if (transactions && transactions.length > 0) {
+                setTransaction(transactions[0]);
+            }
         } catch (error) {
             console.error('Failed to load session:', error);
             Alert.alert('Error', 'Failed to load session details');
@@ -151,6 +159,38 @@ export default function SessionDetailScreen({ route, navigation }: any) {
                         <View style={styles.infoRow}>
                             <Text style={styles.infoLabel}>💰 Price</Text>
                             <Text style={styles.infoValue}>${session.price}</Text>
+                        </View>
+                    )}
+                </View>
+
+                {/* Billing Breakdown (New) */}
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>Billing Breakdown</Text>
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>Base Price</Text>
+                        <Text style={styles.infoValue}>${session.price || 0}</Text>
+                    </View>
+                    {transaction ? (
+                        <>
+                            {Math.max(0, (session.price || 0) - Math.abs(transaction.amount)) > 0.01 && (
+                                <View style={styles.infoRow}>
+                                    <Text style={[styles.infoLabel, { color: '#16a34a' }]}>Discount / Demo</Text>
+                                    <Text style={[styles.infoValue, { color: '#16a34a' }]}>
+                                        -${(Math.max(0, (session.price || 0) - Math.abs(transaction.amount))).toFixed(2)}
+                                    </Text>
+                                </View>
+                            )}
+                            <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
+                                <Text style={[styles.infoLabel, { fontWeight: 'bold', color: '#111827' }]}>Total Paid</Text>
+                                <Text style={[styles.infoValue, { fontWeight: 'bold', color: '#16a34a' }]}>
+                                    ${Math.abs(transaction.amount).toFixed(2)}
+                                </Text>
+                            </View>
+                        </>
+                    ) : (
+                        <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
+                            <Text style={styles.infoLabel}>Status</Text>
+                            <Text style={[styles.infoValue, { color: '#f97316' }]}>Pending / Unbilled</Text>
                         </View>
                     )}
                 </View>

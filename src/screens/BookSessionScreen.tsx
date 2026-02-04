@@ -1,5 +1,5 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -21,6 +21,24 @@ export default function BookSessionScreen({ route, navigation }: any) {
     const [date, setDate] = useState(new Date());
     const [time, setTime] = useState(new Date());
     const [loading, setLoading] = useState(false);
+    const [demoMinutes, setDemoMinutes] = useState(0);
+
+    useEffect(() => {
+        if (psychologistId) {
+            fetchDemoMinutes();
+        }
+    }, [psychologistId]);
+
+    const fetchDemoMinutes = async () => {
+        try {
+            const res = await apiClient.get(`/demo-minutes/psychologist/${psychologistId}`);
+            if (res.data && res.data.remainingMinutes) {
+                setDemoMinutes(res.data.remainingMinutes);
+            }
+        } catch (error) {
+            console.error('Failed to fetch demo minutes', error);
+        }
+    };
 
     // Visibility for pickers
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -157,6 +175,29 @@ export default function BookSessionScreen({ route, navigation }: any) {
                     <Text style={styles.summaryText}>
                         Time: {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Text>
+
+                    {demoMinutes > 0 ? (
+                        <View style={styles.discountContainer}>
+                            <Text style={styles.discountText}>
+                                🎉 {demoMinutes} mins free trial applied!
+                            </Text>
+                            <Text style={styles.discountSavings}>
+                                You save: ${(Math.min(demoMinutes, serviceDuration) * (servicePrice / serviceDuration)).toFixed(2)}
+                            </Text>
+                            <View style={styles.rowBetween}>
+                                <Text style={styles.totalLabel}>Estimated Total:</Text>
+                                <Text style={styles.totalPrice}>
+                                    ${Math.max(0, servicePrice - (Math.min(demoMinutes, serviceDuration) * (servicePrice / serviceDuration))).toFixed(2)}
+                                </Text>
+                            </View>
+                        </View>
+                    ) : (
+                        <View style={styles.rowBetween}>
+                            <Text style={styles.totalLabel}>Total:</Text>
+                            <Text style={styles.totalPrice}>${servicePrice}</Text>
+                        </View>
+                    )}
+
                     <Text style={styles.disclaimer}>
                         Note: This is a request. The psychologist will need to confirm the appointment.
                     </Text>
@@ -308,5 +349,38 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
         fontWeight: 'bold',
+    },
+    discountContainer: {
+        marginTop: 12,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: '#bfdbfe',
+    },
+    discountText: {
+        color: '#16a34a',
+        fontWeight: 'bold',
+        fontSize: 14,
+        marginBottom: 2,
+    },
+    discountSavings: {
+        color: '#16a34a',
+        fontSize: 12,
+        marginBottom: 8,
+    },
+    rowBetween: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 4,
+    },
+    totalLabel: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#1e40af',
+    },
+    totalPrice: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#2563eb',
     },
 });

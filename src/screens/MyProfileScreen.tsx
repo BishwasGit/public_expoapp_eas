@@ -27,6 +27,7 @@ export default function MyProfileScreen({ navigation }: any) {
     const [education, setEducation] = useState('');
     const [experience, setExperience] = useState('');
     const [hourlyRate, setHourlyRate] = useState('');
+    const [demoMinutes, setDemoMinutes] = useState('');
 
     useEffect(() => {
         loadProfile();
@@ -45,6 +46,7 @@ export default function MyProfileScreen({ navigation }: any) {
             setEducation(data.education || '');
             setExperience(data.experience?.toString() || '');
             setHourlyRate(data.hourlyRate?.toString() || '');
+            setDemoMinutes(data.demoMinutes?.toString() || '');
         } catch (error) {
             console.error('Failed to load profile:', error);
         } finally {
@@ -62,6 +64,7 @@ export default function MyProfileScreen({ navigation }: any) {
                 education,
                 experience: experience ? parseInt(experience) : null,
                 hourlyRate: hourlyRate ? parseFloat(hourlyRate) : null,
+                demoMinutes: demoMinutes ? parseFloat(demoMinutes) : 0,
             });
             Alert.alert('Success', 'Profile updated successfully');
             setEditMode(false);
@@ -224,6 +227,23 @@ export default function MyProfileScreen({ navigation }: any) {
                             <Text style={styles.fieldValue}>${hourlyRate || '—'}/hr</Text>
                         )}
                     </View>
+                </View>
+
+                {/* Demo Minutes (New) */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Free Demo Minutes</Text>
+                    {editMode ? (
+                        <TextInput
+                            style={styles.input}
+                            value={demoMinutes}
+                            onChangeText={setDemoMinutes}
+                            keyboardType="numeric"
+                            placeholder="15"
+                            placeholderTextColor="#9ca3af"
+                        />
+                    ) : (
+                        <Text style={styles.fieldValue}>{demoMinutes ? `${demoMinutes} mins` : 'Disabled'}</Text>
+                    )}
                 </View>
 
                 <View style={{ height: 32 }} />
