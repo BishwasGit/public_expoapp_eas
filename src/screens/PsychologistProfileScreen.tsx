@@ -17,6 +17,7 @@ interface Service {
     price: number;
     duration: number;
     isEnabled: boolean;
+    billingType: 'PER_SESSION' | 'PER_MINUTE' | 'BUNDLE_7_DAY';
 }
 
 interface Psychologist {
@@ -113,6 +114,7 @@ export default function PsychologistProfileScreen({ route, navigation }: any) {
             serviceName: service?.name,
             servicePrice: service?.price,
             serviceDuration: service?.duration,
+            serviceBillingType: service?.billingType,
         });
     };
 
@@ -317,7 +319,12 @@ export default function PsychologistProfileScreen({ route, navigation }: any) {
                             <View key={service.id} style={styles.serviceCard}>
                                 <View style={styles.serviceHeader}>
                                     <Text style={styles.serviceName}>{service.name}</Text>
-                                    <Text style={styles.servicePrice}>${service.price}</Text>
+                                    <Text style={styles.servicePrice}>
+                                        ${service.price}
+                                        <Text style={{ fontSize: 12, fontWeight: 'normal', color: '#6b7280' }}>
+                                            {service.billingType === 'PER_MINUTE' ? '/min' : ''}
+                                        </Text>
+                                    </Text>
                                 </View>
                                 {service.description && (
                                     <Text style={styles.serviceDescription} numberOfLines={2}>

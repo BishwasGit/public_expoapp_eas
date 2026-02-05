@@ -16,7 +16,10 @@ import apiClient from '../services/api';
 
 export default function BookSessionScreen({ route, navigation }: any) {
     const { user } = useContext(AuthContext);
-    const { psychologistId, serviceId, serviceName, servicePrice, serviceDuration } = route.params;
+    const { psychologistId, serviceId, serviceName, servicePrice, serviceDuration, serviceBillingType } = route.params;
+
+    const totalBasePrice = serviceBillingType === 'PER_MINUTE' ? (servicePrice * serviceDuration) : servicePrice;
+    const perMinuteRate = serviceBillingType === 'PER_MINUTE' ? servicePrice : (servicePrice / serviceDuration);
 
     const [date, setDate] = useState(new Date());
     const [time, setTime] = useState(new Date());
@@ -115,7 +118,12 @@ export default function BookSessionScreen({ route, navigation }: any) {
             <ScrollView style={styles.content}>
                 <View style={styles.serviceCard}>
                     <Text style={styles.serviceName}>{serviceName || 'Session'}</Text>
-                    <Text style={styles.servicePrice}>${servicePrice || 0}</Text>
+                    <Text style={styles.servicePrice}>
+                        ${servicePrice || 0}
+                        <Text style={{ fontSize: 16, fontWeight: 'normal', color: '#6b7280' }}>
+                            {serviceBillingType === 'PER_MINUTE' ? '/min' : ''}
+                        </Text>
+                    </Text>
                     <Text style={styles.serviceDuration}>{serviceDuration || 60} minutes</Text>
                 </View>
 
@@ -182,19 +190,19 @@ export default function BookSessionScreen({ route, navigation }: any) {
                                 🎉 {demoMinutes} mins free trial applied!
                             </Text>
                             <Text style={styles.discountSavings}>
-                                You save: ${(Math.min(demoMinutes, serviceDuration) * (servicePrice / serviceDuration)).toFixed(2)}
+                                You save: ${(Math.min(demoMinutes, serviceDuration) * perMinuteRate).toFixed(2)}
                             </Text>
                             <View style={styles.rowBetween}>
                                 <Text style={styles.totalLabel}>Estimated Total:</Text>
                                 <Text style={styles.totalPrice}>
-                                    ${Math.max(0, servicePrice - (Math.min(demoMinutes, serviceDuration) * (servicePrice / serviceDuration))).toFixed(2)}
+                                    ${Math.max(0, totalBasePrice - (Math.min(demoMinutes, serviceDuration) * perMinuteRate)).toFixed(2)}
                                 </Text>
                             </View>
                         </View>
                     ) : (
                         <View style={styles.rowBetween}>
                             <Text style={styles.totalLabel}>Total:</Text>
-                            <Text style={styles.totalPrice}>${servicePrice}</Text>
+                            <Text style={styles.totalPrice}>${totalBasePrice}</Text>
                         </View>
                     )}
 

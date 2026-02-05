@@ -9,6 +9,7 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    Switch,
 } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import apiClient from '../services/api';
@@ -28,6 +29,7 @@ export default function MyProfileScreen({ navigation }: any) {
     const [experience, setExperience] = useState('');
     const [hourlyRate, setHourlyRate] = useState('');
     const [demoMinutes, setDemoMinutes] = useState('');
+    const [isProfileVisible, setIsProfileVisible] = useState(false);
 
     useEffect(() => {
         loadProfile();
@@ -47,6 +49,7 @@ export default function MyProfileScreen({ navigation }: any) {
             setExperience(data.experience?.toString() || '');
             setHourlyRate(data.hourlyRate?.toString() || '');
             setDemoMinutes(data.demoMinutes?.toString() || '');
+            setIsProfileVisible(data.isProfileVisible || false);
         } catch (error) {
             console.error('Failed to load profile:', error);
         } finally {
@@ -65,6 +68,7 @@ export default function MyProfileScreen({ navigation }: any) {
                 experience: experience ? parseInt(experience) : null,
                 hourlyRate: hourlyRate ? parseFloat(hourlyRate) : null,
                 demoMinutes: demoMinutes ? parseFloat(demoMinutes) : 0,
+                isProfileVisible: isProfileVisible,
             });
             Alert.alert('Success', 'Profile updated successfully');
             setEditMode(false);
@@ -246,6 +250,33 @@ export default function MyProfileScreen({ navigation }: any) {
                     )}
                 </View>
 
+                {/* Profile Visibility (New) */}
+                <View style={styles.section}>
+                    <View style={styles.rowBetween}>
+                        <View>
+                            <Text style={styles.sectionTitle}>Public Visibility</Text>
+                            <Text style={styles.helperText}>
+                                {isProfileVisible ? 'Visible in search results' : 'Hidden from search results'}
+                            </Text>
+                        </View>
+                        {editMode ? (
+                            <Switch
+                                trackColor={{ false: '#767577', true: '#16a34a' }}
+                                thumbColor={isProfileVisible ? '#f4f3f4' : '#f4f3f4'}
+                                ios_backgroundColor="#3e3e3e"
+                                onValueChange={setIsProfileVisible}
+                                value={isProfileVisible}
+                            />
+                        ) : (
+                            <View style={[styles.badge, { backgroundColor: isProfileVisible ? '#dcfce7' : '#f3f4f6' }]}>
+                                <Text style={[styles.badgeText, { color: isProfileVisible ? '#16a34a' : '#6b7280' }]}>
+                                    {isProfileVisible ? 'Visible' : 'Hidden'}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                </View>
+
                 <View style={{ height: 32 }} />
             </ScrollView>
         </View>
@@ -399,5 +430,24 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         paddingHorizontal: 0,
+    },
+    rowBetween: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    helperText: {
+        fontSize: 12,
+        color: '#6b7280',
+        marginTop: -4,
+    },
+    badge: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+    },
+    badgeText: {
+        fontSize: 12,
+        fontWeight: 'bold',
     },
 });
